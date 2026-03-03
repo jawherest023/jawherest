@@ -1,0 +1,102 @@
+# Commands to run the project (PowerShell, Windows)
+# Save this file and run the commands in separate PowerShell terminals as noted.
+
+#############################
+# Prerequisites / Notes
+#############################
+# - Install Python 3.10+ and Node.js (LTS).
+# - Run PowerShell as a normal user; some commands may require adjusting ExecutionPolicy to run local scripts.
+#   To temporarily allow running local scripts in the current session:
+#     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+# - Recommended: open TWO terminals (one for backend, one for frontend).
+
+#############################
+# Backend (FastAPI)
+#############################
+# 1) Create and activate a Python virtual environment (run from project root):
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# 2) Upgrade pip and install backend requirements:
+python -m pip install --upgrade pip
+cd backend
+pip install -r requirements.txt
+
+# 3) (Optional) If you need local MongoDB setup, run the helper (if provided):
+# From project root (or adjust path):
+# .\setup-mongodb-local.ps1
+
+# 4) Run the backend API (development with automatic reload):
+# From the `backend` directory (where `main.py` lives):
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Alternative: run the main script directly (the project includes a startup block):
+# python main.py
+
+# Alternative: use the included helper script if present:
+# .\run_server.ps1   # run from project root or adjust path
+
+# 5) Run backend tests (if you use pytest):
+# cd backend
+# pytest
+
+# When done with backend in this terminal: Ctrl+C to stop the server
+
+#############################
+# Frontend (Vite + React)
+#############################
+# 1) Open a SECOND PowerShell terminal and go to the frontend folder:
+cd frontend
+
+# 2) Install Node dependencies once:
+npm install
+
+# 3) Start the dev server (Vite). Default port is 5173; if in-use, Vite will try another.
+npm run dev
+
+# Alternative (explicit port):
+npx vite --port 5175
+
+# 4) Build for production:
+npm run build
+
+# 5) Preview a production build locally:
+npm run preview
+
+# Notes: keep the frontend dev server running while developing; it will show the local URL (e.g. http://localhost:5173 or :5174 or :5175)
+
+#############################
+# Running both (concurrently) from PowerShell
+#############################
+# Option A: Manually open two terminals (recommended) — one runs backend, the other runs frontend.
+
+# Option B: Use Start-Process to spawn new PowerShell windows for each service (keeps them running):
+# From project root (adjust the paths if your environment differs):
+Start-Process powershell -ArgumentList '-NoExit','-Command','cd "C:\Users\samer\Documents\dev\chatbot-project\backend"; .\.venv\Scripts\Activate.ps1; python -m uvicorn main:app --reload --port 8000'
+Start-Process powershell -ArgumentList '-NoExit','-Command','cd "C:\Users\samer\Documents\dev\chatbot-project\frontend"; npm run dev'
+
+# Option C: Use a terminal multiplexer or an npm script / concurrently package (not included by default).
+
+#############################
+# Debugging / Useful checks
+#############################
+# - If frontend shows a grey screen, open browser DevTools (F12) and check Console and Network.
+# - Verify backend is reachable:
+#   curl -i http://localhost:8000/conversations
+#   (or use Invoke-RestMethod in PowerShell):
+#   Invoke-RestMethod http://localhost:8000/conversations
+# - If requests are blocked by CORS, ensure backend CORSMiddleware includes your frontend origin (http://localhost:5173 etc.)
+# - If you change env vars (API keys), restart the backend server after setting them in PowerShell:
+#   $env:OPENAI_API_KEY = 'your_key_here'
+#   python -m uvicorn main:app --reload
+
+#############################
+# Cleanup / Stop
+#############################
+# - To stop servers: focus the terminal where they run and press Ctrl+C.
+# - To deactivate Python venv:
+deactivate
+
+#############################
+# End
+#############################
